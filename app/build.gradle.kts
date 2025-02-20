@@ -60,7 +60,6 @@ dependencies {
     implementation(libs.insider.sdk)
     implementation(libs.firebase.messaging)
     implementation(libs.lifecycle.process)
-    implementation(libs.play.services.ads)
     implementation(libs.security.crypto)
 
     implementation(libs.huawei.push)
