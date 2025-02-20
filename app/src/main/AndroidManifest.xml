@@ -35,7 +35,7 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${googleAdsAppId}" />
+            android:value="${yourAdmobAppId}" />
     </application>
 
 </manifest>
