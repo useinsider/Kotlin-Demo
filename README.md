@@ -10,7 +10,7 @@ Check the changelogs 👉 [here](https://academy.useinsider.com/docs/android-sdk
 3. Add your google-service.json
 4. Add your agconnect-services.json (if you are using huawei messaging service)
 5. Replace the [applicationId](https://github.com/useinsider/Kotlin-Demo/blob/main/app/build.gradle.kts#L13) with the one in your google-service.json file
-6. Add [yourAdmobAppId](https://github.com/useinsider/Kotlin-Demo/blob/main/app/src/main/AndroidManifest.xml#L38)
 
  ## Preview
- ![Kotlin Demo](https://github.com/user-attachments/assets/0135388f-fb3f-4987-ac13-c76f5bfa9ad6)
+ 
+![Kotlin Demo](https://github.com/user-attachments/assets/c5246d62-0aaa-4232-8dc2-7503d4ccb700)
