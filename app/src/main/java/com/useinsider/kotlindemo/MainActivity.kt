@@ -267,7 +267,6 @@ class MainActivity : ComponentActivity() {
         val imageURL = "imageURL"
         val price = 1000.5
         val currency = "currency"
-
         // Creating a new Insider Product
         insiderExampleProduct = Insider.Instance.createNewProduct(
             productID, productName, arrayOf(taxonomy), imageURL, price, currency
@@ -311,9 +310,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun itemAddedToCart() {
-        insiderExampleProduct.let {
-            Insider.Instance.itemAddedToCart(it)
-        }
+        // Product information
+        val productID = "productID"
+        val productName = "productName"
+        val taxonomy = "taxonomy"
+        val imageURL = "imageURL"
+        val price = 1000.5
+        val currency = "currency"
+
+        insiderExampleProduct = Insider.Instance.createNewProduct(
+            productID, productName, arrayOf(taxonomy), imageURL, price, currency
+        )
+        Insider.Instance.itemAddedToCart(insiderExampleProduct)
     }
 
     private fun itemRemovedFromCart() {
@@ -321,9 +329,20 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun itemPurchased() {
-        insiderExampleProduct.let {
-            Insider.Instance.itemPurchased("uniqueSaleID", it)
-        }
+        // Product information
+        val productID = "productID"
+        val productName = "productName"
+        val taxonomy = "taxonomy"
+        val imageURL = "imageURL"
+        val price = 1000.5
+        val currency = "currency"
+
+        insiderExampleProduct = Insider.Instance.createNewProduct(
+            productID, productName, arrayOf(taxonomy), imageURL, price, currency
+        )
+
+        Insider.Instance.itemPurchased("uniqueSaleID", insiderExampleProduct)
+
     }
 
     private fun cartCleared() {
@@ -331,9 +350,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun addItemToWishlist() {
-        insiderExampleProduct.let {
-            Insider.Instance.itemAddedToWishlist(it)
-        }
+        // Product information
+        val productID = "productID"
+        val productName = "productName"
+        val taxonomy = "taxonomy"
+        val imageURL = "imageURL"
+        val price = 1000.5
+        val currency = "currency"
+
+        insiderExampleProduct = Insider.Instance.createNewProduct(
+            productID, productName, arrayOf(taxonomy), imageURL, price, currency
+        )
+        Insider.Instance.itemAddedToWishlist(insiderExampleProduct)
     }
 
     private fun removeItemFromWishlist() {
