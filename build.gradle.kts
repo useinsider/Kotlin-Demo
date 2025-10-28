@@ -4,9 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
-
 buildscript {
     dependencies {
-        classpath("com.huawei.agconnect:agcp:1.9.1.300")
+        classpath("com.huawei.agconnect:agcp:1.9.1.302")
     }
 }

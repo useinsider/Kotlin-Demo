@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun reinitPartnerName() {
-        Insider.Instance.reinitWithPartnerName("new_partner_name")
+        Insider.Instance.reinitWithPartnerName("salesdemo")
     }
 
     private fun triggerEvent() {
@@ -242,7 +242,7 @@ class MainActivity : ComponentActivity() {
 
         // Adding array parameter
         val arr = arrayOf("value1", "value2", "value3")
-        insiderExampleEvent.addParameterWithArray("array_parameter", arr)
+        insiderExampleEvent.addParameterWithStringArray("array_parameter", arr)
 
         // Adding multiple parameters using Map
         val parameters = HashMap<String, Any>()
@@ -294,7 +294,7 @@ class MainActivity : ComponentActivity() {
 
         // Adding an array parameter
         val arr = arrayOf("value1", "value2", "value3")
-        insiderExampleProduct.setCustomAttributeWithArray("array_parameter", arr)
+        insiderExampleProduct.setCustomAttributeWithStringArray("array_parameter", arr)
 
         // Setting the group code
         insiderExampleProduct.setGroupCode("XXYYZZ")

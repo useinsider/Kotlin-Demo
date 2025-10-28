@@ -13,7 +13,7 @@ class DemoApplication : Application() {
 
         // TODO: Please change with your partner name.
         // Make sure that all the letters are lowercase.
-        Insider.Instance.init(this, "your_partner_name")
+        Insider.Instance.init(this, "salesdemo")
 
         Insider.Instance.registerInsiderCallback { data, callbackType ->
             when (callbackType) {
