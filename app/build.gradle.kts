@@ -7,12 +7,11 @@ plugins {
 
 android {
     namespace = "com.useinsider.kotlindemo"
-    compileSdk = 35
-
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.useinsider.kotlindemo"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -20,10 +19,8 @@ android {
         //  into the Insider panel. The left side of your mail address.
         manifestPlaceholders["partner"] = "your_partner_name"
         manifestPlaceholders["googleAdsAppId"] = project.findProperty("GOOGLE_ADS_APP_ID") ?: ""
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -55,6 +52,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.work.runtime.ktx)
 
     //Required
     implementation(libs.insider.sdk)
