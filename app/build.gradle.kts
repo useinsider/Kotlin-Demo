@@ -9,7 +9,7 @@ android {
     namespace = "com.useinsider.kotlindemo"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.useinsider.kotlindemo"
+        applicationId = "com.useinsider.ecommerce"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
@@ -34,11 +34,14 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
@@ -52,8 +55,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
 
     //Required
     implementation(libs.insider.sdk)
@@ -67,9 +72,6 @@ dependencies {
 
     //Optional for Geofence
     implementation(libs.play.services.location)
-
-    //Optional for logging
-    implementation(libs.timber)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

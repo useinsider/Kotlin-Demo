@@ -21,18 +21,22 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.useinsider.insider.Insider { *; }
+
 -keep interface com.useinsider.insider.InsiderCallback { *; }
 -keep class com.useinsider.insider.InsiderUser { *; }
+-keep interface com.useinsider.insider.InsiderIDListener { *; }
 -keep interface com.useinsider.insider.InsiderUser$InsiderIDResult { *; }
 -keep class com.useinsider.insider.InsiderProduct { *; }
 -keep class com.useinsider.insider.InsiderEvent { *; }
--keep class com.useinsider.insider.InsiderCallbackTypes { *; }
+-keep class com.useinsider.insider.InsiderCallbackType { *; }
 -keep class com.useinsider.insider.InsiderGender { *; }
--keep interface com.useinsider.insider.Insider$TempStoreAction { *; }
--keep class com.useinsider.insider.RequestUtils { *; }
+-keep class com.useinsider.insider.InsiderIdentifiers { *; }
+-keep class com.useinsider.insider.CloseButtonPosition { *; }
+
 -keep interface com.useinsider.insider.RecommendationEngine$SmartRecommendation { *; }
--keep interface com.useinsider.insider.RequestUtils$MessageCenterData { *; }
--keep class com.useinsider.insider.Geofence { *; }
+-keep interface com.useinsider.insider.MessageCenterData { *; }
+-keep class com.useinsider.insider.InsiderGeofence { *; }
+-keep class com.useinsider.insider.HuaweiGeofence { *; }
 -keep class com.useinsider.insider.ContentOptimizerDataType { *; }
--keep class org.openudid.** { *; }
--keep class com.useinsider.insider.OpenUDID_manager { *; }
+
+-keeppackagenames com.useinsider.insider.analytics
