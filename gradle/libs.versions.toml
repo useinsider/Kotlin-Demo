@@ -9,8 +9,7 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.13.0"
 composeBom = "2026.03.00"
-insider_sdk = "15.3.0"
-timber = "5.0.1"
+insider_sdk = "+" # e.g.: 15.3.0
 firebase_messaging = "25.0.1"
 play_services_location = "21.3.0"
 lifecycle_process = "2.10.0"
@@ -22,7 +21,7 @@ agconnect_service = "1.9.1.300"
 huawei_agconnect = "1.9.1.304"
 security_crypto = "1.1.0"
 work = "2.11.1"
-navigationCompose = "2.9.0"
+navigationCompose = "2.9.7"
 
 
 [libraries]
@@ -42,7 +41,6 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 insider_sdk = { module = "com.useinsider:insider", version.ref = "insider_sdk" }
-timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 firebase_messaging = { module = "com.google.firebase:firebase-messaging", version.ref = "firebase_messaging" }
 play_services_location = { module = "com.google.android.gms:play-services-location", version.ref = "play_services_location" }
 lifecycle_process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_process" }

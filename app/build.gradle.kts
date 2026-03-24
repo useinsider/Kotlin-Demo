@@ -15,9 +15,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // TODO: Please change with your partner name. You can find the partner name after login
-        //  into the Insider panel. The left side of your mail address.
-        manifestPlaceholders["partner"] = "your_partner_name"
+        // TODO: Please change with your partner name.
+        val partnerName = "your_partner_name"
+        manifestPlaceholders["partner"] = partnerName
+        buildConfigField("String", "PARTNER_NAME", "\"$partnerName\"")
         manifestPlaceholders["googleAdsAppId"] = project.findProperty("GOOGLE_ADS_APP_ID") ?: ""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,6 +37,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

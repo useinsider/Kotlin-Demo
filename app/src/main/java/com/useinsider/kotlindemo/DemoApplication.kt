@@ -9,9 +9,7 @@ class DemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // TODO: Please change with your partner name.
-        // Make sure that all the letters are lowercase.
-        Insider.Instance.init(this, "your_partner_name")
+        Insider.Instance.init(this, BuildConfig.PARTNER_NAME)
 
         Insider.Instance.registerInsiderCallback { data, callbackType ->
             CallbackStore.update("$data")
