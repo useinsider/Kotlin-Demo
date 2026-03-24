@@ -76,10 +76,17 @@ dependencies {
 
     // Without Huawei support
     // implementation("com.useinsider:insider:15.3.0-nh")
+
+    // Optional: WebView support
+    // implementation("com.useinsider:insiderwebview:1.0.0")
 }
 ```
 
 > **Note:** Use the `-nh` (no Huawei) variant if your app does not target Huawei devices. This excludes Huawei dependencies from your build.
+
+### InsiderWebView (Optional)
+
+If your app uses WebView and you want Insider to track in-app browser events, add the `insiderwebview` dependency. This enables the SDK to capture user interactions within WebView content.
 
 ## SDK Initialization
 

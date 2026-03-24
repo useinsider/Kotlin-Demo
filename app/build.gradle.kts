@@ -64,6 +64,8 @@ dependencies {
 
     //Required
     implementation(libs.insider.sdk)
+    implementation(libs.insider.webview)
+    implementation(libs.webkit)
     implementation(libs.firebase.messaging)
     implementation(libs.lifecycle.process)
     implementation(libs.security.crypto)
