@@ -37,7 +37,8 @@ import com.useinsider.kotlindemo.viewmodel.MainViewModel
 fun MainScreen(
     viewModel: MainViewModel,
     onNavigateToCustomEvent: () -> Unit,
-    onNavigateToCustomAttributes: () -> Unit
+    onNavigateToCustomAttributes: () -> Unit,
+    onNavigateToAppCards: () -> Unit
 ) {
     val callback: (String) -> Unit = { viewModel.updatePrintLabel(it) }
 
@@ -70,7 +71,8 @@ fun MainScreen(
                 columns = 3,
                 buttons = listOf(
                     ButtonItem("Insider ID") { InsiderActions.getInsiderID(callback) },
-                    ButtonItem("Start Tracking Geofence") { InsiderActions.startTrackingGeofence(callback) }
+                    ButtonItem("Start Tracking Geofence") { InsiderActions.startTrackingGeofence(callback) },
+                    ButtonItem("App Cards") { onNavigateToAppCards() }
                 )
             )
             Spacer(Modifier.height(16.dp))
