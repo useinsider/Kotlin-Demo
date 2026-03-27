@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     //Required
     implementation(libs.insider.sdk)
