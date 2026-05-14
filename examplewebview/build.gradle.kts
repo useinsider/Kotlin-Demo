@@ -14,17 +14,13 @@ android {
         versionName = "1.0.0"
 
         // TODO: Please change with your partner name.
-        val partnerName = "partnername"
+        val partnerName = "orkunbites"
         manifestPlaceholders["partner"] = partnerName
         buildConfigField("String", "PARTNER_NAME", "\"$partnerName\"")
     }
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
     }
     compileOptions {

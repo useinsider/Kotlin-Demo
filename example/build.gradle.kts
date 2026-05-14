@@ -15,27 +15,14 @@ android {
         versionName = "1.0.0"
 
         // TODO: Please change with your partner name.
-        val partnerName = "partnername"
+        val partnerName = "orkunbites"
         manifestPlaceholders["partner"] = partnerName
         buildConfigField("String", "PARTNER_NAME", "\"$partnerName\"")
         manifestPlaceholders["googleAdsAppId"] = project.findProperty("GOOGLE_ADS_APP_ID") ?: ""
     }
-    signingConfigs {
-        create("release") {
-            storeFile = file(System.getenv("KEYSTORE_FILE") ?: "insider.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEYSTORE_KEY_ALIAS")
-            keyPassword = System.getenv("KEYSTORE_KEY_PASSWORD")
-        }
-    }
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
         }
     }
     compileOptions {
