@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_muted">#F0CABF</color>
+    <color name="accent_primary">#F4482B</color>
+    <color name="accent_secondary">#50E9C3</color>
+    <color name="border_strong">#3D18181B</color>
+    <color name="border_subtle">#1F18181B</color>
+    <color name="gradient_blue">#2EDEE2</color>
+    <color name="gradient_green">#71F3A7</color>
+    <color name="gradient_orange">#FF6126</color>
+    <color name="gradient_red">#E92E2F</color>
+    <color name="on_accent_primary">#EFEBE4</color>
+    <color name="palette_celestial">#50E9C3</color>
+    <color name="palette_cosmic">#F0CABF</color>
+    <color name="palette_dark_matter">#18181B</color>
+    <color name="palette_eclipse">#261A28</color>
+    <color name="palette_lunar">#D0C2C7</color>
+    <color name="palette_nova">#EFEBE4</color>
+    <color name="palette_orbit">#23423D</color>
+    <color name="palette_solar">#F4482B</color>
+    <color name="palette_stardust">#CFEBDD</color>
+    <color name="palette_stratos">#44221E</color>
+    <color name="status_danger">#E92E2F</color>
+    <color name="status_info">#2EDEE2</color>
+    <color name="status_success">#71F3A7</color>
+    <color name="status_warning">#FF6126</color>
+    <color name="surface_primary">#EFEBE4</color>
+    <color name="surface_secondary">#D0C2C7</color>
+    <color name="text_disabled">#5918181B</color>
+    <color name="text_primary">#18181B</color>
+    <color name="text_secondary">#B318181B</color>
+    <color name="text_tertiary">#8018181B</color>
+</resources>

@@ -1,4 +1,7 @@
-# Insider Android SDK Example
+# Insider Android SDKs Example
+
+[![Maven Version](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fmobilesdk.useinsider.com%2Fandroid%2Fcom%2Fuseinsider%2Finsider%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Frelease&label=insider&color=blue)](https://mobilesdk.useinsider.com/android/com/useinsider/insider/)
+[![Maven Version](https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fmobilesdk.useinsider.com%2Fandroid%2Fcom%2Fuseinsider%2Finsiderwebview%2Fmaven-metadata.xml&query=%2F%2Fmetadata%2Fversioning%2Frelease&label=insiderwebview&color=blue)](https://mobilesdk.useinsider.com/android/com/useinsider/insider/)
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4b33cb82-5896-4b0a-b2bd-a294c421d8d8" width="400">
@@ -10,15 +13,75 @@
   <a href="LICENSE">MIT License</a>
 </p>
 
-This project demonstrates how to integrate the [Insider Android SDK](https://academy.insiderone.com/docs/android-integration) into a Kotlin application. It includes a fully working example with push notifications, geofence tracking, and all major SDK features.
+This project demonstrates how to integrate the [Insider Android SDK](https://academy.insiderone.com/docs/android-integration) into a Kotlin application. It ships **two app modules** — one for the Native SDK (`insider`) and one for the WebView SDK (`insiderwebview`) — each fully wired with push notifications, geofence tracking, in-app messaging and the full event surface.
 
 ## Requirements
 
 | Requirement | Minimum |
 |---|---|
 | Android | API 24 (Android 7.0) |
-| Kotlin | 2.0+ |
-| Android Gradle Plugin | 8.0+ |
+| Kotlin | 2.3+ |
+| Android Gradle Plugin | 9.0+ |
+| JDK | 21 (required by AGP 9) |
+
+## Project Structure
+
+The project ships **two flavors** of the example app (**`example`**) — app using `insider` library and a webview-based app (**`examplewebview`**) using `insiderwebview` library — as independent gradle modules sharing a single root build.
+
+```
+KotlinDemo/
+├── example/                                 
+│   ├── build.gradle.kts
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/useinsider/kotlindemo/
+│       │   ├── ExampleApplication.kt # SDK initialization & callbacks
+│       │   ├── MainActivity.kt              
+│       │   ├── InsiderFirebaseMessagingService.kt
+│       │   ├── action/             # SDK feature implementations         
+│       │   ├── callback/, component/, model/, navigation/, screen/, ui/, viewmodel/
+│       └── res/
+│           └── values/{colors,strings,themes}.xml
+│
+├── examplewebview/                          
+│   ├── build.gradle.kts
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/useinsider/examplewebview/
+│       │   ├── ExampleWebViewApplication.kt # SDK initialization & callbacks
+│       │   ├── MainActivity.kt              
+│       │   └── InsiderFirebaseMessagingService.kt
+│       ├── assets/index.html
+│       └── res/
+│           └── values/{colors,strings,themes}.xml
+│
+├── settings.gradle.kts                 
+├── build.gradle.kts
+└── gradle/libs.versions.toml                # Version Catalog
+```
+
+| Module | Flavor | SDKs |
+|---|---|---|
+| `example` | Native | `insider` |
+| `examplewebview` | WebView | `insider` + `insiderwebview` |
+
+| Feature | Native | WebView |
+|---|:---:|:---:|
+| **Reinit** | 🟢 | 🔴 |
+| Event tracking (`tagEvent`, custom events) | 🟢 | 🟢 |
+| Page-visit events (home, listing, PDP, cart, wishlist) | 🟢 | 🟢 |
+| User identifiers (login, logout) | 🟢 | 🟢 |
+| User attributes & opt-ins (email, SMS, push, location, ...) | 🟢 | 🟢 |
+| Product, cart, wishlist, purchase events | 🟢 | 🟢 |
+| In-app messaging (enable / disable) | 🟢 | 🟢 |
+| **Smart Recommender** | 🟢 | 🔴 |
+| **Content Optimizer** (A/B testing) | 🟢 | 🔴 |
+| Push notifications (FCM + HMS) | 🟢 | 🟢 |
+| Geofencing | 🟢 | 🟢 |
+| GDPR (carrier, IP, location, ...) | 🟢 | 🟢 |
+| **App Cards** (campaign messaging) | 🟢 | 🔴 |
+
+If your use case depends on any row in **bold**, pick `example` module. Otherwise either module works.
 
 ## Getting Started
 
@@ -31,129 +94,137 @@ cd KotlinDemo
 
 ### 2. Configure Your App
 
-Before running, update the following values with your own:
+Before running, update the following values in **each module's `build.gradle.kts`** (`example/build.gradle.kts` and/or `examplewebview/build.gradle.kts`):
 
-1. **Partner Name** in the module-level `app/build.gradle.kts`:
+- **Partner Name** — used by the SDK at runtime and exposed as `BuildConfig.PARTNER_NAME`:
 
 ```kotlin
-val partnerName = "your_partner_name"
-manifestPlaceholders["partner"] = partnerName
-buildConfigField("String", "PARTNER_NAME", "\"$partnerName\"")
+val partnerName = "YOUR_PARTNER_NAME"
 ```
 
-This makes the partner name available both to the SDK's manifest configuration and to your Kotlin code via `BuildConfig.PARTNER_NAME`.
-
-3. **Application ID**: Replace the `applicationId` in `app/build.gradle.kts` with the one matching your `google-services.json` file:
+- **Application ID** — must match the package registered in your `google-services.json`:
 
 ```kotlin
 applicationId = "com.your.package.name"
 ```
 
-4. **Firebase**: Add your `google-services.json` file to the `app/` directory.
+- **Firebase** — drop your `google-services.json` into the module root (`example/` and/or `examplewebview/`). The file is git-ignored.
 
-5. **Huawei** *(optional)*: If you are using Huawei Messaging Service, add your `agconnect-services.json` file to the `app/` directory.
+- **Huawei** *(optional)* — drop `agconnect-services.json` into the same module root if you target Huawei devices.
 
-### 3. Add the SDK Dependency
+### 3. SDK Dependencies
 
-The Insider SDK is hosted on a custom Maven repository. Make sure the following repository is declared in your `settings.gradle.kts`:
+The Insider Maven repository is already declared in [`settings.gradle.kts`](settings.gradle.kts):
 
 ```kotlin
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven { url = uri("https://mobilesdk.useinsider.com/android") }
+        maven { url = uri("https://developer.huawei.com/repo/") }
     }
 }
 ```
 
-Then add the SDK dependency in your module-level `build.gradle.kts`:
+Versions are pinned in `gradle/libs.versions.toml`:
+
+```toml
+[versions]
+insider_sdk     = "+"  # e.g.: 16.0.3
+insider_webview = "+"  # e.g.: 1.0.0
+
+[libraries]
+insider_sdk     = { module = "com.useinsider:insider",        version.ref = "insider_sdk" }
+insider_webview = { module = "com.useinsider:insiderwebview", version.ref = "insider_webview" }
+```
+
+And consumed from each module:
 
 ```kotlin
 dependencies {
-    // With Huawei support
-    implementation("com.useinsider:insider:15.3.0")
+    // Native SDK (required by both modules)
+    implementation(libs.insider.sdk)
 
-    // Without Huawei support
-    // implementation("com.useinsider:insider:15.3.0-nh")
+    // WebView SDK (only in :examplewebview)
+    // implementation(libs.insider.webview)
 
-    // Optional: WebView support
-    // implementation("com.useinsider:insiderwebview:1.0.0")
+    // Use the -nh variant of insider if you do not target Huawei devices
+    // implementation("com.useinsider:insider:16.0.3-nh")
 }
 ```
 
-> **Note:** Use the `-nh` (no Huawei) variant if your app does not target Huawei devices. This excludes Huawei dependencies from your build.
-
-### InsiderWebView (Optional)
-
-If your app uses WebView and you want Insider to track in-app browser events, add the `insiderwebview` dependency. This enables the SDK to capture user interactions within WebView content.
+> **JDK note:** AGP 9 requires JDK 21. If your `JAVA_HOME` is older, point Gradle at Android Studio's bundled JBR:
+> ```bash
+> export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+> ```
 
 ## SDK Initialization
 
-The SDK should be initialized in your `Application` class:
+The SDK is initialized in your `Application` subclass. Both modules follow the same pattern — see `ExampleApplication.kt` and `ExampleWebViewApplication.kt`:
 
 ```kotlin
+import android.app.Application
 import com.useinsider.insider.Insider
+import com.useinsider.insider.InsiderCallbackType
 
-class MyApplication : Application() {
+public class ExampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Initialize with your partner name (all lowercase)
-        Insider.Instance.init(this, "YOUR_PARTNER_NAME")
+        Insider.Instance.init(this, BuildConfig.PARTNER_NAME)
 
-        // Register callback handler for SDK events
+        // Optional: register a callback for SDK events
         Insider.Instance.registerInsiderCallback { data, callbackType ->
             when (callbackType) {
-                InsiderCallbackType.NOTIFICATION_OPEN -> { /* Handle push notification tap */ }
-                InsiderCallbackType.INAPP_SEEN -> { /* Handle in-app message impression */ }
-                InsiderCallbackType.INAPP_BUTTON_CLICK -> { /* Handle in-app button interaction */ }
-                InsiderCallbackType.TEMP_STORE_CUSTOM_ACTION -> { /* Handle custom action */ }
-                InsiderCallbackType.TEMP_STORE_PURCHASE -> { /* Handle purchase */ }
-                InsiderCallbackType.TEMP_STORE_ADDED_TO_CART -> { /* Handle add to cart */ }
-                InsiderCallbackType.SESSION_STARTED -> { /* Handle session start */ }
+                InsiderCallbackType.NOTIFICATION_OPEN       -> { /* push tapped */ }
+                InsiderCallbackType.INAPP_SEEN              -> { /* in-app impression */ }
+                InsiderCallbackType.INAPP_BUTTON_CLICK      -> { /* in-app button */ }
+                InsiderCallbackType.TEMP_STORE_CUSTOM_ACTION-> { /* custom action */ }
+                InsiderCallbackType.TEMP_STORE_PURCHASE     -> { /* purchase */ }
+                InsiderCallbackType.TEMP_STORE_ADDED_TO_CART-> { /* add to cart */ }
+                InsiderCallbackType.SESSION_STARTED         -> { /* session start */ }
             }
         }
     }
 }
 ```
 
-> **Important:** Make sure your `Application` class is declared in `AndroidManifest.xml`:
->
-> ```xml
-> <application
->     android:name=".MyApplication"
->     ... >
-> ```
+Register the `Application` class in the module's `AndroidManifest.xml`:
+
+```xml
+<application
+    android:name=".ExampleApplication"
+    ... >
+```
 
 ## Push Notifications
 
 ### Firebase Cloud Messaging
 
-To handle push notifications from Insider, create a `FirebaseMessagingService` and delegate Insider messages to the SDK:
+Both modules include a `FirebaseMessagingService` that hands Insider-tagged messages to the SDK:
 
 ```kotlin
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.useinsider.insider.Insider
 
-class MyFirebaseMessagingService : FirebaseMessagingService() {
+public class InsiderFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-
         if (remoteMessage.data["source"] == "Insider") {
             Insider.Instance.handleFCMNotification(applicationContext, remoteMessage)
-            return
         }
     }
 }
 ```
 
-Register the service in your `AndroidManifest.xml`:
+Registered in `AndroidManifest.xml`:
 
 ```xml
 <service
-    android:name=".MyFirebaseMessagingService"
+    android:name=".InsiderFirebaseMessagingService"
     android:exported="false">
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -161,42 +232,151 @@ Register the service in your `AndroidManifest.xml`:
 </service>
 ```
 
-Don't forget to add the Firebase Messaging dependency:
+Required dependency (already wired in both modules):
 
 ```kotlin
-dependencies {
-    implementation("com.google.firebase:firebase-messaging:25.0.1")
+implementation(libs.firebase.messaging)
+```
+
+The Google Services plugin is applied per-module — it reads `google-services.json` at build time:
+
+```kotlin
+plugins {
+    alias(libs.plugins.google.services)
 }
 ```
 
 ### Huawei Messaging Service (Optional)
 
-If your app targets Huawei devices, add the Huawei repository and dependencies:
+For Huawei devices, both modules include the HMS push, ads, and location dependencies:
 
 ```kotlin
-// settings.gradle.kts
-maven { url = uri("https://developer.huawei.com/repo/") }
-
-// build.gradle.kts (module)
-dependencies {
-    implementation("com.huawei.hms:push:6.13.0.300")
-}
+implementation(libs.huawei.push)
+implementation(libs.huawei.ads)
+implementation(libs.huawei.location)
 ```
+
+The Insider SDK handles HMS push internally — no extra service registration needed beyond dropping `agconnect-services.json` into the module root.
 
 ## Geofence Tracking (Optional)
 
-To enable geofence tracking, add the location dependency and start tracking:
+Available in `example` module. To enable, add the location dependency and start tracking from your application:
 
 ```kotlin
 // build.gradle.kts
-dependencies {
-    implementation("com.google.android.gms:play-services-location:21.3.0")
-}
+implementation(libs.play.services.location)
 ```
 
 ```kotlin
-// In your Application class
+// Application.onCreate()
 Insider.Instance.startTrackingGeofence()
+```
+
+## InsiderWebView
+
+The `examplewebview` module demonstrates the `insiderwebview` SDK. The `MainActivity` hands the `WebView` to the SDK via a single call, then loads the demo page from the APK assets:
+
+```kotlin
+import android.app.Activity
+import android.os.Bundle
+import android.webkit.WebView
+import com.useinsider.insiderwebview.InsiderWebView
+
+public class MainActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val webView = findViewById<WebView>(R.id.web_view)
+        InsiderWebView.setupWebViewSDK(webView)
+        webView.loadUrl("file:///android_asset/index.html")
+    }
+}
+```
+
+The demo ships two ways of feeding [`index.html`](examplewebview/src/main/assets/index.html) to the web view — pick whichever fits your workflow.
+
+### Loading the page from the APK assets
+
+The [`index.html`](examplewebview/src/main/assets/index.html) file is packaged into the APK at build time, so is available via the `file:///android_asset/` URL scheme:
+
+```kotlin
+webView.loadUrl("file:///android_asset/index.html")
+```
+
+### Loading the page from a local HTTP server
+
+While iterating on [`index.html`](examplewebview/src/main/assets/index.html), it is faster to serve the file over HTTP so you can edit and refresh without rebuilding the app. From the repository root, run:
+
+```bash
+python3 -m http.server 8080 --directory examplewebview/src/main/assets
+```
+
+Then replace the `loadUrl(...)` call with:
+
+```kotlin
+webView.loadUrl("http://localhost:8080/index.html") // emulator → host
+```
+
+> **Note:** Android blocks plaintext HTTP traffic by default starting with API 28. To load `http://...` URLs you must add `android:usesCleartextTraffic="true"` to the `<application>` element in `AndroidManifest.xml`, or use a Network Security Config that allows the specific dev host.
+
+### Using the SDK from TypeScript
+
+When the page loaded in the WebView is part of a TypeScript codebase, you can get full type-safety and autocompletion for the JavaScript bridge that `InsiderWebView.setupWebViewSDK` injects. The [`InsiderWebViewScript.d.ts`](examplewebview/src/main/assets/InsiderWebViewScript.d.ts) file (shipped with the iOS demo) declares ambient types for the bridge — there is no runtime code in it; it only describes the API that the native SDK exposes at runtime as `window.insider`.
+
+It declares:
+
+- A global `window.insider` of type `Insider` (the bridge entry point).
+- Classes / enums you can construct in TypeScript:
+  - `InsiderEvent`
+  - `InsiderProduct`
+  - `InsiderIdentifiers`
+  - `InsiderUser`
+- Supporting types: 
+  - `Insider`
+  - `InsiderIDListener`
+  - `InsiderListenerRegistration`
+  - `MessageCenterMessage`
+
+#### Wire it into your project
+
+Copy [`InsiderWebViewScript.d.ts`](examplewebview/src/main/assets/InsiderWebViewScript.d.ts) into your web app's source tree (e.g. `src/types/`) and reference it in `tsconfig.json`:
+
+```json
+{
+  "include": ["src/**/*", "src/types/InsiderWebViewScript.d.ts"]
+}
+```
+
+Alternatively, put a triple-slash reference at the top of your entry file:
+
+```ts
+/// <reference path="./types/InsiderWebViewScript.d.ts" />
+```
+
+That is enough to make `window.insider` strongly typed everywhere — no `import` needed because the file augments the global `Window` interface.
+
+#### Use the typed bridge
+
+All calls are checked at compile time — wrong parameter shapes or types will fail `tsc` before they ever reach the device. Note that event and parameter keys are typed as plain `string`, so they are not constrained at compile time; follow the SDK's naming rules (lowercase, starts with a letter, only `a–z`, `0–9`, `_`).
+
+```ts
+async function onPurchase() {
+    const product = window.insider
+        .createNewProduct(
+          'prod-123',
+          'Headphones',
+          ['Audio', 'Headphones'],
+          'https://cdn.example.com/p/123.jpg',
+          199.99,
+          'USD'
+        )
+        .setBrand('Acme')
+        .setSalePrice(149.99)
+        .setStock(42);
+
+    await window.insider.itemPurchased('sale-789', product, { campaign: 'spring_sale' });
+}
 ```
 
 ## License

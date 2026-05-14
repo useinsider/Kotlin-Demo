@@ -23,5 +23,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KotlinDemo"
-include(":app")
+include(":example")
+include(":examplewebview")
  

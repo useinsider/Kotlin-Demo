@@ -55,13 +55,13 @@ log "Output: ${OUTPUT_DIR}"
 test -x "${REPOSITORY_DIR}/gradlew" || chmod +x "${REPOSITORY_DIR}/gradlew"
 
 log "Cleaning..."
-"${REPOSITORY_DIR}/gradlew" :app:clean --stacktrace
+"${REPOSITORY_DIR}/gradlew" :example:clean --stacktrace
 log "Cleaned."
 
 log "Building: ${ASSEMBLE_TASK}"
-"${REPOSITORY_DIR}/gradlew" ":app:${ASSEMBLE_TASK}" --stacktrace
+"${REPOSITORY_DIR}/gradlew" ":example:${ASSEMBLE_TASK}" --stacktrace
 
-APK_FILE="${REPOSITORY_DIR}/app/build/outputs/apk/${VARIANT}/app-${VARIANT}.apk"
+APK_FILE="${REPOSITORY_DIR}/example/build/outputs/apk/${VARIANT}/example-${VARIANT}.apk"
 
 if [[ -z "${APK_FILE}" || ! -f "${APK_FILE}" ]]; then
   echo "Error: APK not found: ${APK_FILE}"

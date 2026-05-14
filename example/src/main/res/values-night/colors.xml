@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_muted">#23423D</color>
+    <color name="accent_primary">#EFEBE4</color>
+    <color name="border_strong">#47EFEBE4</color>
+    <color name="border_subtle">#24EFEBE4</color>
+    <color name="on_accent_primary">#18181B</color>
+    <color name="surface_primary">#261A28</color>
+    <color name="surface_secondary">#23423D</color>
+    <color name="text_disabled">#66EFEBE4</color>
+    <color name="text_primary">#EFEBE4</color>
+    <color name="text_secondary">#BFEFEBE4</color>
+    <color name="text_tertiary">#8CEFEBE4</color>
+</resources>
