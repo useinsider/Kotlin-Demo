@@ -71,11 +71,6 @@
             align-items: center;
         }
 
-        /* Inline ExampleSwift logo asset (Primary_SolarDarkMatter.pdf converted to SVG).
-         * Original viewBox 1335x185 — icon on the left, "INSIDER ONE" text on the right.
-         * Native ExampleSwift renders this asset aspect-fit into a 120×40pt frame, which
-         * yields ~17pt visible height. Match that height here so the web banner sits at
-         * the same visual scale as the trash button in the native nav bar. */
         .brand-logo { height: 17px; width: auto; flex: 0 0 auto; display: block; }
 
         .page-title {
@@ -153,12 +148,6 @@
          * inputs inside 2-col rows can't push the right column off-screen. */
         .grid > * { min-width: 0; }
 
-        /* Horizontal scroll row (mirrors iOS Core/Consent sections).
-         * Stays inside the container's 10px padding so the row has the same
-         * visible left/right gutter as every non-scrolling section. The page
-         * itself doesn't scroll horizontally (body has overflow-x: hidden);
-         * only the row's own overflow-x: auto handles the side-scroll.
-         * Scrollbar is hidden (iOS pattern). */
         .h-scroll {
             display: flex;
             gap: 6px;
@@ -411,7 +400,6 @@
         <h2 class="section-title">Core</h2>
         <div class="h-scroll">
             <button class="btn" onclick="didTouchGetInsiderID()">Insider ID</button>
-            <button class="btn" onclick="didTouchRegisterForAPNS()">Register for APNS</button>
             <button class="btn" onclick="didTouchStartTrackingGeofence()">Start Tracking Geofence</button>
             <button class="btn" onclick="didTouchGetMessageCenterData()">Get Message Center Data</button>
         </div>
@@ -634,13 +622,30 @@
 
 <script>
     // -----------------------------------------------------------------
-    // Bootstrap — set internal browser close button on load.
+    // Android runtime-permission bridge.
     // -----------------------------------------------------------------
-    window.insider.setInternalBrowserCloseButtonPosition(window.insider.closeButtonPosition.RIGHT);
+    var pendingPermissionResolvers = {};
 
-    // Disable iOS keyboard auto-capitalize / auto-correct / spell-check on every
-    // text field — this is a developer/test surface, raw lowercase identifiers
-    // (e.g. "product_viewed", "en_US") should not be auto-corrected.
+    window._permissionResolve = function (callbackId, granted) {
+        const resolve = pendingPermissionResolvers[callbackId];
+        if (!resolve) return;
+        delete pendingPermissionResolvers[callbackId];
+        resolve(!!granted);
+    };
+
+    function requestPermission(kind) {
+        return new Promise(function (resolve) {
+            const bridge = window.Permissions;
+            if (!bridge || typeof bridge.request !== 'function') {
+                resolve(true);
+                return;
+            }
+            const callbackId = 'permission-' + Math.random().toString(36).slice(2, 8);
+            pendingPermissionResolvers[callbackId] = resolve;
+            bridge.request(kind, callbackId);
+        });
+    }
+
     function disableKeyboardAssist(el) {
         el.setAttribute('autocapitalize', 'off');
         el.setAttribute('autocorrect', 'off');
@@ -766,8 +771,6 @@
     // Custom
     // -----------------------------------------------------------------
     function didTouchCustomAction() {
-        // Placeholder for ad-hoc test code — edit this body to try things out
-        // without re-deploying the SDK. Mirrors iOS ExampleSwift's CustomAction.
         logInfo('Run your custom action here (demo/index.html). e.g., window.insider.tagEvent("ping").build()');
     }
 
@@ -778,71 +781,112 @@
         try {
             const insiderID = await window.insider.getInsiderID();
             logInfo('Insider ID:', insiderID);
-        } catch (error) { logError('Error getting Insider ID', error); }
-    }
-
-    async function didTouchRegisterForAPNS() {
-        // iOS: Insider.register(withQuietPermission: false) — closest web equivalent
-        try {
-            await window.insider.registerWithQuietPermission(false);
-            logInfo('Registered with quiet permission');
-        } catch (error) { logError('Error registering for APNS', error); }
+        } catch (error) {
+            logError('Error getting Insider ID', error);
+        }
     }
 
     async function didTouchStartTrackingGeofence() {
+        const granted = await requestPermission('location');
+        if (!granted) {
+            logInfo('Geofence: location permission denied');
+            return;
+        }
         try {
             await window.insider.getCurrentUser().setLocationOptin(true);
             await window.insider.startTrackingGeofence();
             logInfo('Geofence tracking started');
-        } catch (error) { logError('Error starting geofence tracking', error); }
+        } catch (error) {
+            logError('Error starting geofence tracking', error);
+        }
     }
 
     // -----------------------------------------------------------------
     // Consent
     // -----------------------------------------------------------------
     async function didTouchSetGDPRConsent(consent) {
-        try { await window.insider.setGDPRConsent(consent); logInfo('GDPR consent set to', consent); }
-        catch (error) { logError('Error setting GDPR consent', error); }
+        try {
+            await window.insider.setGDPRConsent(consent);
+            logInfo('GDPR consent set to', consent);
+        } catch (error) {
+            logError('Error setting GDPR consent', error);
+        }
     }
     async function didTouchSetMobileAppAccess(access) {
-        try { await window.insider.setMobileAppAccess(access); logInfo('Mobile app access set to', access); }
-        catch (error) { logError('Error setting mobile app access', error); }
+        try {
+            await window.insider.setMobileAppAccess(access);
+            logInfo('Mobile app access set to', access);
+        } catch (error) {
+            logError('Error setting mobile app access', error);
+        }
     }
     function didTouchEnableIDFACollection(enable) {
         // iOS-only — no IDFA on web.
         logUnsupported('Enable IDFA Collection (' + enable + ')');
     }
     async function didTouchEnableIpCollection(enable) {
-        try { await window.insider.enableIpCollection(enable); logInfo('IP collection set to', enable); }
-        catch (error) { logError('Error setting IP collection', error); }
+        try {
+            await window.insider.enableIpCollection(enable);
+            logInfo('IP collection set to', enable);
+        } catch (error) {
+            logError('Error setting IP collection', error);
+        }
     }
     async function didTouchEnableCarrierCollection(enable) {
-        try { await window.insider.enableCarrierCollection(enable); logInfo('Carrier collection set to', enable); }
-        catch (error) { logError('Error setting carrier collection', error); }
+        try {
+            await window.insider.enableCarrierCollection(enable);
+            logInfo('Carrier collection set to', enable);
+        } catch (error) {
+            logError('Error setting carrier collection', error);
+        }
     }
     async function didTouchEnableLocationCollection(enable) {
-        try { await window.insider.enableLocationCollection(enable); logInfo('Location collection set to', enable); }
-        catch (error) { logError('Error setting location collection', error); }
+        try {
+            await window.insider.enableLocationCollection(enable);
+            logInfo('Location collection set to', enable);
+        } catch (error) {
+            logError('Error setting location collection', error);
+        }
     }
     async function didTouchSetEmailOptin(optin) {
-        try { await window.insider.getCurrentUser().setEmailOptin(optin); logInfo('Email opt-in set to', optin); }
-        catch (error) { logError('Error setting email opt-in', error); }
+        try {
+            await window.insider.getCurrentUser().setEmailOptin(optin);
+            logInfo('Email opt-in set to', optin);
+        } catch (error) {
+            logError('Error setting email opt-in', error);
+        }
     }
     async function didTouchSetPushOptin(optin) {
-        try { await window.insider.getCurrentUser().setPushOptin(optin); logInfo('Push opt-in set to', optin); }
-        catch (error) { logError('Error setting push opt-in', error); }
+        try {
+            await window.insider.getCurrentUser().setPushOptin(optin);
+            logInfo('Push opt-in set to', optin);
+        } catch (error) {
+            logError('Error setting push opt-in', error);
+        }
     }
     async function didTouchSetLocationOptin(optin) {
-        try { await window.insider.getCurrentUser().setLocationOptin(optin); logInfo('Location opt-in set to', optin); }
-        catch (error) { logError('Error setting location opt-in', error); }
+        try {
+            await window.insider.getCurrentUser().setLocationOptin(optin);
+            logInfo('Location opt-in set to', optin);
+        } catch (error) {
+            logError('Error setting location opt-in', error);
+        }
     }
     async function didTouchSetSMSOptin(optin) {
-        try { await window.insider.getCurrentUser().setSMSOptin(optin); logInfo('SMS opt-in set to', optin); }
-        catch (error) { logError('Error setting SMS opt-in', error); }
+        try {
+            await window.insider.getCurrentUser().setSMSOptin(optin);
+            logInfo('SMS opt-in set to', optin);
+        } catch (error) {
+            logError('Error setting SMS opt-in', error);
+        }
     }
     async function didTouchSetWhatsAppOptin(optin) {
-        try { await window.insider.getCurrentUser().setWhatsappOptin(optin); logInfo('WhatsApp opt-in set to', optin); }
-        catch (error) { logError('Error setting WhatsApp opt-in', error); }
+        try {
+            await window.insider.getCurrentUser().setWhatsappOptin(optin);
+            logInfo('WhatsApp opt-in set to', optin);
+        } catch (error) {
+            logError('Error setting WhatsApp opt-in', error);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -858,14 +902,18 @@
                 .addCustomIdentifier('preferred_language', 'en');
             const insiderID = await window.insider.getCurrentUser().login(identifiers);
             logInfo('Logged in. Insider ID:', insiderID);
-        } catch (error) { logError('Error logging in', error); }
+        } catch (error) {
+            logError('Error logging in', error);
+        }
     }
 
     async function didTouchLogout() {
         try {
             await window.insider.getCurrentUser().logout();
             logInfo('User logged out');
-        } catch (error) { logError('Error logging out', error); }
+        } catch (error) {
+            logError('Error logging out', error);
+        }
     }
 
     async function didTouchLogoutResettingInsiderID() {
@@ -875,7 +923,9 @@
                 .addUserID(generateRandomString(8));
             const newID = await window.insider.getCurrentUser().logoutResettingInsiderID([identifiers]);
             logInfo('Logged out + reset ID. New Insider ID:', newID);
-        } catch (error) { logError('Error in logoutResettingInsiderID', error); }
+        } catch (error) {
+            logError('Error in logoutResettingInsiderID', error);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -908,19 +958,29 @@
                     return;
             }
             logInfo('Set user attribute:', kind);
-        } catch (error) { logError('Error setting ' + kind, error); }
+        } catch (error) {
+            logError('Error setting ' + kind, error);
+        }
     }
 
     // -----------------------------------------------------------------
     // Inapp
     // -----------------------------------------------------------------
     async function didTouchEnableInAppMessages() {
-        try { await window.insider.enableInAppMessages(); logInfo('Inapp messages enabled'); }
-        catch (error) { logError('Error enabling inapp messages', error); }
+        try {
+            await window.insider.enableInAppMessages();
+            logInfo('Inapp messages enabled');
+        } catch (error) {
+            logError('Error enabling inapp messages', error);
+        }
     }
     async function didTouchDisableInAppMessages() {
-        try { await window.insider.disableInAppMessages(); logInfo('Inapp messages disabled'); }
-        catch (error) { logError('Error disabling inapp messages', error); }
+        try {
+            await window.insider.disableInAppMessages();
+            logInfo('Inapp messages disabled');
+        } catch (error) {
+            logError('Error disabling inapp messages', error);
+        }
     }
     async function didTouchGetMessageCenterData() {
         try {
@@ -929,15 +989,21 @@
             startDate.setDate(startDate.getDate() - 30);
             const data = await window.insider.getMessageCenterData(startDate, endDate, 10);
             logInfo('Message center data retrieved. Count:', Array.isArray(data) ? data.length : data);
-        } catch (error) { logError('Error getting message center data', error); }
+        } catch (error) {
+            logError('Error getting message center data', error);
+        }
     }
 
     // -----------------------------------------------------------------
     // Event
     // -----------------------------------------------------------------
     async function didTouchVisitHomePage() {
-        try { await window.insider.visitHomePage(); logInfo('Visited home page'); }
-        catch (error) { logError('Error visiting home page', error); }
+        try {
+            await window.insider.visitHomePage();
+            logInfo('Visited home page');
+        } catch (error) {
+            logError('Error visiting home page', error);
+        }
     }
     async function didTouchVisitHomePageCustom() {
         try {
@@ -947,13 +1013,17 @@
                 'date': new Date(),
             });
             logInfo('Visited home page (custom params)');
-        } catch (error) { logError('Error visiting home page', error); }
+        } catch (error) {
+            logError('Error visiting home page', error);
+        }
     }
     async function didTouchVisitListingPage() {
         try {
             await window.insider.visitListingPage(['Erkek', 'T-shirt', 'Adidas']);
             logInfo('Visited listing page');
-        } catch (error) { logError('Error visiting listing page', error); }
+        } catch (error) {
+            logError('Error visiting listing page', error);
+        }
     }
     async function didTouchVisitListingPageCustom() {
         try {
@@ -962,13 +1032,17 @@
                 { 'sort_by': 'price', 'filter_brand': 'Adidas' }
             );
             logInfo('Visited listing page (custom params)');
-        } catch (error) { logError('Error visiting listing page', error); }
+        } catch (error) {
+            logError('Error visiting listing page', error);
+        }
     }
     async function didTouchVisitProductPage() {
         try {
             await window.insider.visitProductDetailsPage(buildSampleProduct());
             logInfo('Visited product details page');
-        } catch (error) { logError('Error visiting product page', error); }
+        } catch (error) {
+            logError('Error visiting product page', error);
+        }
     }
     async function didTouchVisitProductPageCustom() {
         try {
@@ -977,13 +1051,17 @@
                 { 'source': 'recommendation', 'position': 3 }
             );
             logInfo('Visited product details page (custom params)');
-        } catch (error) { logError('Error visiting product page', error); }
+        } catch (error) {
+            logError('Error visiting product page', error);
+        }
     }
     async function didTouchVisitCartPage() {
         try {
             await window.insider.visitCartPage(buildSampleProducts(5));
             logInfo('Visited cart page');
-        } catch (error) { logError('Error visiting cart page', error); }
+        } catch (error) {
+            logError('Error visiting cart page', error);
+        }
     }
     async function didTouchVisitCartPageCustom() {
         try {
@@ -992,13 +1070,17 @@
                 { 'coupon_applied': true, 'cart_source': 'wishlist' }
             );
             logInfo('Visited cart page (custom params)');
-        } catch (error) { logError('Error visiting cart page', error); }
+        } catch (error) {
+            logError('Error visiting cart page', error);
+        }
     }
     async function didTouchSignUpConfirmation() {
         try {
             await window.insider.signUpConfirmation({ 'method': 'email', 'referral': 'campaign_123' });
             logInfo('Sign up confirmation sent');
-        } catch (error) { logError('Error sending sign up confirmation', error); }
+        } catch (error) {
+            logError('Error sending sign up confirmation', error);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -1008,7 +1090,9 @@
         try {
             await window.insider.itemAddedToCart(buildSampleProduct());
             logInfo('Item added to cart');
-        } catch (error) { logError('Error adding item to cart', error); }
+        } catch (error) {
+            logError('Error adding item to cart', error);
+        }
     }
     async function didTouchItemAddedToCartCustom() {
         try {
@@ -1017,23 +1101,33 @@
                 { 'source': 'product_detail', 'quantity': 2 }
             );
             logInfo('Item added to cart (custom params)');
-        } catch (error) { logError('Error adding item to cart', error); }
+        } catch (error) {
+            logError('Error adding item to cart', error);
+        }
     }
     async function didTouchItemRemovedFromCart() {
-        try { await window.insider.itemRemovedFromCart('productId'); logInfo('Item removed from cart'); }
-        catch (error) { logError('Error removing item from cart', error); }
+        try {
+            await window.insider.itemRemovedFromCart('productId');
+            logInfo('Item removed from cart');
+        } catch (error) {
+            logError('Error removing item from cart', error);
+        }
     }
     async function didTouchItemRemovedFromCartCustom() {
         try {
             await window.insider.itemRemovedFromCart('productId', { 'reason': 'out_of_stock' });
             logInfo('Item removed from cart (custom params)');
-        } catch (error) { logError('Error removing item from cart', error); }
+        } catch (error) {
+            logError('Error removing item from cart', error);
+        }
     }
     async function didTouchItemPurchased() {
         try {
             await window.insider.itemPurchased('orderId-12345', buildSampleProduct());
             logInfo('Item purchased');
-        } catch (error) { logError('Error purchasing item', error); }
+        } catch (error) {
+            logError('Error purchasing item', error);
+        }
     }
     async function didTouchItemPurchasedCustom() {
         try {
@@ -1043,21 +1137,29 @@
                 { 'payment_method': 'credit_card', 'installments': 3 }
             );
             logInfo('Item purchased (custom params)');
-        } catch (error) { logError('Error purchasing item', error); }
+        } catch (error) {
+            logError('Error purchasing item', error);
+        }
     }
     async function didTouchCartClearedCustom() {
         try {
             await window.insider.cartCleared({ 'reason': 'user_action', 'item_count': 5 });
             logInfo('Cart cleared (custom params)');
-        } catch (error) { logError('Error clearing cart', error); }
+        } catch (error) {
+            logError('Error clearing cart', error);
+        }
     }
 
     // -----------------------------------------------------------------
     // Wishlist
     // -----------------------------------------------------------------
     async function didTouchVisitWishlist() {
-        try { await window.insider.visitWishlist(buildSampleProducts(5)); logInfo('Visited wishlist'); }
-        catch (error) { logError('Error visiting wishlist', error); }
+        try {
+            await window.insider.visitWishlist(buildSampleProducts(5));
+            logInfo('Visited wishlist');
+        } catch (error) {
+            logError('Error visiting wishlist', error);
+        }
     }
     async function didTouchVisitWishlistCustom() {
         try {
@@ -1066,11 +1168,17 @@
                 { 'source': 'profile', 'sort_by': 'date_added' }
             );
             logInfo('Visited wishlist (custom params)');
-        } catch (error) { logError('Error visiting wishlist', error); }
+        } catch (error) {
+            logError('Error visiting wishlist', error);
+        }
     }
     async function didTouchItemAddedToWishlist() {
-        try { await window.insider.itemAddedToWishlist(buildSampleProduct()); logInfo('Item added to wishlist'); }
-        catch (error) { logError('Error adding item to wishlist', error); }
+        try {
+            await window.insider.itemAddedToWishlist(buildSampleProduct());
+            logInfo('Item added to wishlist');
+        } catch (error) {
+            logError('Error adding item to wishlist', error);
+        }
     }
     async function didTouchItemAddedToWishlistCustom() {
         try {
@@ -1079,27 +1187,41 @@
                 { 'source': 'product_detail', 'notify_price_drop': true }
             );
             logInfo('Item added to wishlist (custom params)');
-        } catch (error) { logError('Error adding item to wishlist', error); }
+        } catch (error) {
+            logError('Error adding item to wishlist', error);
+        }
     }
     async function didTouchItemRemovedFromWishlist() {
-        try { await window.insider.itemRemovedFromWishlist('productId'); logInfo('Item removed from wishlist'); }
-        catch (error) { logError('Error removing item from wishlist', error); }
+        try {
+            await window.insider.itemRemovedFromWishlist('productId');
+            logInfo('Item removed from wishlist');
+        } catch (error) {
+            logError('Error removing item from wishlist', error);
+        }
     }
     async function didTouchItemRemovedFromWishlistCustom() {
         try {
             await window.insider.itemRemovedFromWishlist('productId', { 'reason': 'purchased' });
             logInfo('Item removed from wishlist (custom params)');
-        } catch (error) { logError('Error removing item from wishlist', error); }
+        } catch (error) {
+            logError('Error removing item from wishlist', error);
+        }
     }
     async function didTouchWishlistCleared() {
-        try { await window.insider.wishlistCleared(); logInfo('Wishlist cleared'); }
-        catch (error) { logError('Error clearing wishlist', error); }
+        try {
+            await window.insider.wishlistCleared();
+            logInfo('Wishlist cleared');
+        } catch (error) {
+            logError('Error clearing wishlist', error);
+        }
     }
     async function didTouchWishlistClearedCustom() {
         try {
             await window.insider.wishlistCleared({ 'reason': 'bulk_add_to_cart', 'item_count': 3 });
             logInfo('Wishlist cleared (custom params)');
-        } catch (error) { logError('Error clearing wishlist', error); }
+        } catch (error) {
+            logError('Error clearing wishlist', error);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -1178,12 +1300,6 @@
         return out;
     }
 
-    // -----------------------------------------------------------------
-    // Coerce raw text-field input to the JS type the SDK expects.
-    // Empty values are rejected up-front (the SDK's validateParameters
-    // would reject them anyway with type:'string'/'number'/'boolean'),
-    // so we return ok:false instead of letting the SDK throw mid-loop.
-    // -----------------------------------------------------------------
     function coerceParamValue(type, rawValue) {
         const raw = rawValue == null ? '' : String(rawValue);
         switch (type) {
@@ -1246,7 +1362,9 @@
             const skipMsg = skipped.length ? ' | skipped: ' + skipped.join(', ') : '';
             logInfo('Event sent "' + eventName + '"' + addedMsg + skipMsg);
             navigateTo('main');
-        } catch (error) { logError('Error sending custom event', error); }
+        } catch (error) {
+            logError('Error sending custom event', error);
+        }
     }
 
     // -----------------------------------------------------------------
@@ -1278,7 +1396,9 @@
             const skipMsg = skipped.length ? ' | skipped: ' + skipped.join(', ') : '';
             logInfo('Custom attributes set' + addedMsg + skipMsg);
             navigateTo('main');
-        } catch (error) { logError('Error setting custom attributes', error); }
+        } catch (error) {
+            logError('Error setting custom attributes', error);
+        }
     }
 </script>
 </body>

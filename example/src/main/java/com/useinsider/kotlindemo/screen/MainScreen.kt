@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.useinsider.kotlindemo.action.InsiderActions
+import com.useinsider.kotlindemo.permission.rememberRuntimePermissionRequester
 import com.useinsider.kotlindemo.component.ButtonGrid
 import com.useinsider.kotlindemo.component.HeaderBar
 import com.useinsider.kotlindemo.component.InputFieldGrid
@@ -41,6 +42,7 @@ public fun MainScreen(
     onNavigateToAppCards: () -> Unit
 ): Unit {
     val callback: (String) -> Unit = { viewModel.updatePrintLabel(it) }
+    val permissions = rememberRuntimePermissionRequester()
 
     Column(
         modifier = Modifier
@@ -71,7 +73,12 @@ public fun MainScreen(
                 columns = 3,
                 buttons = listOf(
                     ButtonItem("Insider ID") { InsiderActions.getInsiderID(callback) },
-                    ButtonItem("Start Tracking Geofence") { InsiderActions.startTrackingGeofence(callback) },
+                    ButtonItem("Start Tracking Geofence") {
+                        permissions.withLocationPermission { granted ->
+                            if (granted) InsiderActions.startTrackingGeofence(callback)
+                            else callback("Geofence: location permission denied")
+                        }
+                    },
                     ButtonItem("App Cards") { onNavigateToAppCards() }
                 )
             )

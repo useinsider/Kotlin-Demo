@@ -260,7 +260,7 @@ The Insider SDK handles HMS push internally — no extra service registration ne
 
 ## Geofence Tracking (Optional)
 
-Available in `example` module. To enable, add the location dependency and start tracking from your application:
+Available in both `example` and `examplewebview` modules. To enable, add the location dependency and start tracking from your application:
 
 ```kotlin
 // build.gradle.kts
@@ -271,6 +271,83 @@ implementation(libs.play.services.location)
 // Application.onCreate()
 Insider.Instance.startTrackingGeofence()
 ```
+
+> **Note:** `startTrackingGeofence()` requires `ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION` at runtime — see the **Runtime Permissions** section below.
+
+## Runtime Permissions
+
+Insider features that touch OS-protected resources require both a `<uses-permission>` entry in `AndroidManifest.xml` **and** a runtime request on Android 6.0+ (API 23+). Adding the permission to the manifest alone is **not** sufficient — without a runtime request the OS returns `PERMISSION_DENIED` and the feature silently fails.
+
+| Feature | Permission(s) | Required from |
+|---|---|---|
+| Push notifications (FCM/HMS) | `POST_NOTIFICATIONS` | Android 13 (API 33) |
+| Geofence tracking | `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | Android 6 (API 23) |
+| Background geofence | `ACCESS_BACKGROUND_LOCATION` | Android 10 (API 29) — separate flow |
+
+> The SDK's own consent flags (`setPushOptin`, `setLocationOptin`, `enableLocationCollection`) do **not** require any OS permission — they only record the user's consent inside the SDK. OS permissions are needed when an action actually touches the platform (delivering a notification, reading location).
+
+Both modules declare these permissions in `AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+```
+
+### Native (Compose) — `example`
+
+The `example` module ships a small Compose helper at [`permission/RuntimePermissions.kt`](example/src/main/java/com/useinsider/kotlindemo/permission/RuntimePermissions.kt) that wraps `ActivityResultContracts.RequestMultiplePermissions`:
+
+```kotlin
+val permissions = rememberRuntimePermissionRequester()
+
+InsiderGradientButton(
+    text = "Start Tracking Geofence",
+    onClick = {
+        permissions.withLocationPermission { granted ->
+            if (granted) Insider.Instance.startTrackingGeofence()
+        }
+    }
+)
+```
+
+The helper checks `ContextCompat.checkSelfPermission` first and only launches the request dialog when the permission is not already granted. `withPushPermission` follows the same pattern for `POST_NOTIFICATIONS` (no-op on pre-13 devices).
+
+### WebView — `examplewebview`
+
+The `examplewebview` module exposes a JavaScript bridge so the page running inside the WebView can trigger native permission dialogs. `MainActivity` registers an `ActivityResultLauncher` and injects a [`PermissionBridge`](examplewebview/src/main/java/com/useinsider/examplewebview/permission/PermissionBridge.kt) into the WebView under the name `Permissions`:
+
+```kotlin
+webView.addJavascriptInterface(
+    PermissionBridge(activity = this, webView = webView, requestPush = ..., requestLocation = ...),
+    "Permissions"
+)
+```
+
+[`index.html`](examplewebview/src/main/assets/index.html) exposes a `Promise`-returning `requestPermission(kind)` helper that wraps the bridge and is called from the relevant buttons:
+
+```js
+async function didTouchStartTrackingGeofence() {
+    const granted = await requestPermission('location');
+    if (!granted) {
+        logInfo('Geofence: location permission denied');
+        return;
+    }
+    await window.insider.startTrackingGeofence();
+}
+```
+
+When the page is opened in a regular browser (no native bridge), `requestPermission` falls back to resolving `true` so the demo page stays usable for HTML/JS iteration.
+
+### Where to request `POST_NOTIFICATIONS`
+
+The demo does not bind `POST_NOTIFICATIONS` to a single button — pick the UX that fits your app:
+- **On first launch**, before the user reaches a screen that depends on notifications.
+- **On a "Register for Push" / onboarding step**, where it makes sense in context.
+- **Right before** the first notification-driven feature is enabled.
+
+Use the same `withPushPermission` helper (Native) or `requestPermission('push')` bridge call (WebView) — the manifest entry is already in place.
 
 ## InsiderWebView
 
